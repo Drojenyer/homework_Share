@@ -39,3 +39,10 @@ __screenshots__/
 *.timestamp-*-*.mjs
 
 .env
+
+# Compressed files
+*.zip
+*.rar
+*.7z
+*.tar.gz
+*.tar.bz2

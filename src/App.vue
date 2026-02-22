@@ -16,7 +16,7 @@ const subjects = [
     <header class="app-header">
       <h1 class="app-title">资源分享平台-需要自取</h1>
       <div class="user-info">
-        <span>作者声明：本网站中的部分作业由个人完成，如有错误概不负责！</span>
+        <span>作者声明：本网站中的部分作业由个人完成，如有错误概不负责！(仅仅仅供参考)</span>
       </div>
     </header>
     <nav class="app-nav">

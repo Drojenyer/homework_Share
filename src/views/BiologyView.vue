@@ -7,8 +7,7 @@ import SubjectView from './SubjectView.vue'
 
 const images = [
   {
-    name: '暂无内容',
-    url: ''
+    name: '暂无内容（实在太多了，拍不过来啊...）',
   },
 ]
 </script>

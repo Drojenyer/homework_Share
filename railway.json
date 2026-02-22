@@ -1,6 +1,12 @@
 {
-  "build": {
-    "builder": "static",
-    "outputDir": "dist"
-  }
+    "build": {
+        "builder": "npm",
+        "command": "npm run build",
+        "outputDir": "dist"
+    },
+    "deploy": {
+        "startCommand": "npm run preview",
+        "restartPolicyType": "on-failure",
+        "restartPolicyMaxRetries": 10
+    }
 }

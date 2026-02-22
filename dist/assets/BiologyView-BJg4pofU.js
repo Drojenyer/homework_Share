@@ -1,0 +1,1 @@
+import{S as o}from"./SubjectView-BVY2bK7Z.js";import{c as a,o as t}from"./index-BMVH6IuP.js";const n={__name:"BiologyView",setup(c){const e=[{name:"暂无内容（实在太多了，拍不过来啊...）"}];return(s,r)=>(t(),a(o,{subjectName:"生物",images:e}))}};export{n as default};

@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
+  mode: 'hash',
+  history: createWebHistory('/hwshare/'),
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {

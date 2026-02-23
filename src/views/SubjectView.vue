@@ -2,12 +2,27 @@
   <div class="subject-container">
     <div class="subject-header">
       <h2>{{ subjectName }}资源</h2>
-      <p>分享作业答案</p>
+      <p>分享作业答案（加载时可能有卡顿，请耐心等待）</p>
     </div>
     
     <div class="image-grid">
       <div v-for="(image, index) in images" :key="index" class="image-item" :style="{ animationDelay: `${index * 0.1}s` }">
-        <img :src="image.url" :alt="`${subjectName}作业 ${index + 1}`" @click="openImage(image.url)" />
+        <div class="image-wrapper">
+          <img 
+            :src="image.url" 
+            :alt="`${subjectName}作业 ${index + 1}`" 
+            @click="openImage(image.url)"
+            loading="lazy"
+            @load="handleImageLoad(index)"
+            @error="handleImageError(index)"
+          />
+          <div v-if="loadingImages.includes(index)" class="image-loading">
+            <div class="loading-spinner"></div>
+          </div>
+          <div v-if="errorImages.includes(index)" class="image-error">
+            <span>图片加载失败</span>
+          </div>
+        </div>
         <p>{{ image.name }}</p>
       </div>
     </div>
@@ -24,15 +39,18 @@
               @touchmove="handleTouchMove"
               @touchend="handleTouchEnd"
               :style="{
-                transform: `scale(${scale}) translate(${translateX}px, ${translateY}px)`,
+                transform: `scale(${scale}) rotate(${rotation}deg) translate(${translateX}px, ${translateY}px)`,
                 transition: 'transform 0.1s ease-out'
               }"
             />
           </transition>
         </div>
         <div class="modal-controls">
+          <button class="nav-button prev-button" @click="prevImage" v-if="images.length > 1">上一张</button>
           <button class="close-button" @click="closeImage">关闭</button>
           <button class="reset-button" @click="resetZoom">重置</button>
+          <button class="rotate-button" @click="rotateImage">旋转</button>
+          <button class="nav-button next-button" @click="nextImage" v-if="images.length > 1">下一张</button>
         </div>
       </div>
     </div>
@@ -40,7 +58,7 @@
 </template>
 
 <script setup>
-import { ref, computed, defineProps } from 'vue'
+import { ref, computed, defineProps, onMounted } from 'vue'
 
 const props = defineProps({
   subjectName: {
@@ -54,7 +72,9 @@ const props = defineProps({
 })
 
 const selectedImage = ref(null)
+const currentImageIndex = ref(-1)
 const scale = ref(1)
+const rotation = ref(0)
 const lastDistance = ref(0)
 const touchStartX = ref(0)
 const touchStartY = ref(0)
@@ -62,19 +82,53 @@ const translateX = ref(0)
 const translateY = ref(0)
 const lastTranslateX = ref(0)
 const lastTranslateY = ref(0)
+const loadingImages = ref([])
+const errorImages = ref([])
 
 const openImage = (url) => {
   selectedImage.value = url
   scale.value = 1
+  rotation.value = 0
   translateX.value = 0
   translateY.value = 0
   lastTranslateX.value = 0
   lastTranslateY.value = 0
+  
+  // 记录当前图片索引
+  const index = props.images.findIndex(img => img.url === url)
+  currentImageIndex.value = index
+}
+
+// 切换到上一张图片
+const prevImage = () => {
+  if (props.images.length === 0) return
+  
+  currentImageIndex.value = (currentImageIndex.value - 1 + props.images.length) % props.images.length
+  selectedImage.value = props.images[currentImageIndex.value].url
+  // 重置缩放、旋转和位置
+  resetZoom()
+}
+
+// 切换到下一张图片
+const nextImage = () => {
+  if (props.images.length === 0) return
+  
+  currentImageIndex.value = (currentImageIndex.value + 1) % props.images.length
+  selectedImage.value = props.images[currentImageIndex.value].url
+  // 重置缩放、旋转和位置
+  resetZoom()
+}
+
+// 旋转图片
+const rotateImage = () => {
+  rotation.value = (rotation.value + 90) % 360
 }
 
 const closeImage = () => {
   selectedImage.value = null
+  currentImageIndex.value = -1
   scale.value = 1
+  rotation.value = 0
   translateX.value = 0
   translateY.value = 0
   lastTranslateX.value = 0
@@ -123,11 +177,28 @@ const handleTouchEnd = () => {
 
 const resetZoom = () => {
   scale.value = 1
+  rotation.value = 0
   translateX.value = 0
   translateY.value = 0
   lastTranslateX.value = 0
   lastTranslateY.value = 0
 }
+
+// 图片加载处理
+const handleImageLoad = (index) => {
+  loadingImages.value = loadingImages.value.filter(i => i !== index)
+}
+
+const handleImageError = (index) => {
+  loadingImages.value = loadingImages.value.filter(i => i !== index)
+  errorImages.value.push(index)
+}
+
+// 初始化加载状态
+onMounted(() => {
+  // 初始时标记所有图片为加载中
+  loadingImages.value = props.images.map((_, index) => index)
+})
 </script>
 
 <style scoped>
@@ -194,18 +265,101 @@ p {
   border-color: #007bff;
 }
 
-.image-item img {
+.image-wrapper {
+  position: relative;
   width: 100%;
   height: 160px;
-  object-fit: cover;
-  border-radius: 6px;
   margin-bottom: 0.8rem;
-  transition: transform 0.3s ease;
+  border-radius: 6px;
+  overflow: hidden;
   border: 1px solid #f1f3f5;
 }
 
-.image-item:hover img {
+.image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.image-item:hover .image-wrapper img {
   transform: scale(1.08);
+}
+
+/* 图片加载状态 */
+.image-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+}
+
+.loading-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(102, 126, 234, 0.2);
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 图片加载错误状态 */
+.image-error {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(248, 249, 250, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+  border: 1px solid #dee2e6;
+}
+
+.image-error span {
+  color: #dc3545;
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 0 1rem;
+}
+
+/* 响应式调整 */
+@media (min-width: 768px) {
+  .image-wrapper {
+    height: 200px;
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .image-wrapper {
+    height: 120px;
+    margin-bottom: 0.3rem;
+  }
+  
+  .loading-spinner {
+    width: 20px;
+    height: 20px;
+    border-width: 2px;
+  }
+  
+  .image-error span {
+    font-size: 0.7rem;
+  }
 }
 
 .image-item p {
@@ -285,68 +439,152 @@ p {
   right: 10px;
   display: flex;
   gap: 10px;
+  align-items: center;
   z-index: 10;
 }
 
 .close-button {
-  background: #fff;
-  color: #333;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
   border: none;
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  font-size: 18px;
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
 }
 
 .close-button:hover {
-  background: #f8f9fa;
-  transform: scale(1.1);
+  background: linear-gradient(135deg, #764ba2, #667eea);
+  transform: scale(1.15) rotate(90deg);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
 }
 
 .reset-button {
-  background: #fff;
-  color: #333;
-  border: none;
+  background: rgba(255, 255, 255, 0.95);
+  color: #667eea;
+  border: 2px solid #667eea;
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  font-size: 14px;
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
 }
 
 .reset-button:hover {
-  background: #f8f9fa;
+  background: #667eea;
+  color: white;
   transform: scale(1.1);
+  box-shadow: 0 6px 18px rgba(102, 126, 234, 0.4);
+}
+
+/* 旋转按钮样式 */
+.rotate-button {
+  background: rgba(255, 255, 255, 0.95);
+  color: #667eea;
+  border: 2px solid #667eea;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+}
+
+.rotate-button:hover {
+  background: #667eea;
+  color: white;
+  transform: scale(1.1) rotate(90deg);
+  box-shadow: 0 6px 18px rgba(102, 126, 234, 0.4);
+}
+
+/* 导航按钮样式 */
+.nav-button {
+  background: rgba(255, 255, 255, 0.95);
+  color: #667eea;
+  border: 2px solid #667eea;
+  border-radius: 25px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+}
+
+.nav-button:hover {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.prev-button::before {
+  content: '←';
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.next-button::after {
+  content: '→';
+  font-size: 1.1rem;
+  font-weight: bold;
 }
 
 /* 移动端优化 */
 @media (max-width: 480px) {
   .modal-controls {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
     top: 15px;
     right: 15px;
-    gap: 8px;
+    left: 15px;
   }
   
   .close-button,
-  .reset-button {
-    width: 32px;
-    height: 32px;
-    font-size: 16px;
+  .reset-button,
+  .rotate-button {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
   }
   
-  .reset-button {
-    font-size: 12px;
+  .reset-button,
+  .rotate-button {
+    font-size: 14px;
+  }
+  
+  .nav-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    border-width: 1px;
+  }
+  
+  .prev-button::before,
+  .next-button::after {
+    font-size: 1rem;
   }
 }
 

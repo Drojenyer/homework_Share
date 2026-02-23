@@ -4,107 +4,107 @@
 
 <script setup>
 import SubjectView from './SubjectView.vue'
-import img1 from '@/assets/Physics/IMG_20260222_144235.jpg'
-import img2 from '@/assets/Physics/IMG_20260222_144241.jpg'
-import img3 from '@/assets/Physics/IMG_20260222_144305.jpg'
-import img4 from '@/assets/Physics/IMG_20260222_144312.jpg'
-import img5 from '@/assets/Physics/IMG_20260222_144332.jpg'
-import img6 from '@/assets/Physics/IMG_20260222_144338.jpg'
-import img7 from '@/assets/Physics/IMG_20260222_144351.jpg'
-import img8 from '@/assets/Physics/IMG_20260222_144358.jpg'
-import img9 from '@/assets/Physics/IMG_20260222_144551.jpg'
-import img10 from '@/assets/Physics/IMG_20260222_144556.jpg'
-import img11 from '@/assets/Physics/IMG_20260222_144913.jpg'
-import img12 from '@/assets/Physics/IMG_20260222_144926.jpg'
-import img13 from '@/assets/Physics/IMG_20260222_145417.jpg'
-import img14 from '@/assets/Physics/IMG_20260222_145439.jpg'
-import img15 from '@/assets/Physics/IMG_20260222_145454.jpg'
-import img16 from '@/assets/Physics/IMG_20260222_145508.jpg'
-import img17 from '@/assets/Physics/IMG_20260222_145715.jpg'
-import img18 from '@/assets/Physics/IMG_20260222_145733.jpg'
-import img19 from '@/assets/Physics/IMG_20260222_145807.jpg'
-import img20 from '@/assets/Physics/IMG_20260222_145831.jpg'
+import img1_1 from '@/assets/Physics/1-1.png'
+import img1_2 from '@/assets/Physics/1-2.png'
+import img2_1 from '@/assets/Physics/2-1.png'
+import img2_2 from '@/assets/Physics/2-2.png'
+import img3_1 from '@/assets/Physics/3-1.png'
+import img3_3 from '@/assets/Physics/3-3.png'
+import img4_1 from '@/assets/Physics/4-1.png'
+import img4_2 from '@/assets/Physics/4-2.png'
+import img5_1 from '@/assets/Physics/5-1.png'
+import img5_2 from '@/assets/Physics/5-2.png'
+import img6_1 from '@/assets/Physics/6-1.png'
+import img6_2 from '@/assets/Physics/6-2.png'
+import img7_1 from '@/assets/Physics/7-1.png'
+import img7_2 from '@/assets/Physics/7-2.png'
+import img8_1 from '@/assets/Physics/8-1.png'
+import img8_2 from '@/assets/Physics/8-2.png'
+import img9_1 from '@/assets/Physics/9-1.png'
+import img9_2 from '@/assets/Physics/9-2.png'
+import img10_1 from '@/assets/Physics/10-1.png'
+import img10_2 from '@/assets/Physics/10-2.png'
 
 const images = [
   {
-    name: 'IMG_20260222_144235',
-    url: img1
+    name: '1-1',
+    url: img1_1
   },
   {
-    name: 'IMG_20260222_144241',
-    url: img2
+    name: '1-2',
+    url: img1_2
   },
   {
-    name: 'IMG_20260222_144305',
-    url: img3
+    name: '2-1',
+    url: img2_1
   },
   {
-    name: 'IMG_20260222_144312',
-    url: img4
+    name: '2-2',
+    url: img2_2
   },
   {
-    name: 'IMG_20260222_144332',
-    url: img5
+    name: '3-1',
+    url: img3_1
   },
   {
-    name: 'IMG_20260222_144338',
-    url: img6
+    name: '3-3',
+    url: img3_3
   },
   {
-    name: 'IMG_20260222_144351',
-    url: img7
+    name: '4-1',
+    url: img4_1
   },
   {
-    name: 'IMG_20260222_144358',
-    url: img8
+    name: '4-2',
+    url: img4_2
   },
   {
-    name: 'IMG_20260222_144551',
-    url: img9
+    name: '5-1',
+    url: img5_1
   },
   {
-    name: 'IMG_20260222_144556',
-    url: img10
+    name: '5-2',
+    url: img5_2
   },
   {
-    name: 'IMG_20260222_144913',
-    url: img11
+    name: '6-1',
+    url: img6_1
   },
   {
-    name: 'IMG_20260222_144926',
-    url: img12
+    name: '6-2',
+    url: img6_2
   },
   {
-    name: 'IMG_20260222_145417',
-    url: img13
+    name: '7-1',
+    url: img7_1
   },
   {
-    name: 'IMG_20260222_145439',
-    url: img14
+    name: '7-2',
+    url: img7_2
   },
   {
-    name: 'IMG_20260222_145454',
-    url: img15
+    name: '8-1',
+    url: img8_1
   },
   {
-    name: 'IMG_20260222_145508',
-    url: img16
+    name: '8-2',
+    url: img8_2
   },
   {
-    name: 'IMG_20260222_145715',
-    url: img17
+    name: '9-1',
+    url: img9_1
   },
   {
-    name: 'IMG_20260222_145733',
-    url: img18
+    name: '9-2',
+    url: img9_2
   },
   {
-    name: 'IMG_20260222_145807',
-    url: img19
+    name: '10-1',
+    url: img10_1
   },
   {
-    name: 'IMG_20260222_145831',
-    url: img20
+    name: '10-2',
+    url: img10_2
   }
 ]
 </script>

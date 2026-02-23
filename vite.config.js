@@ -16,4 +16,20 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['vue', 'vue-router', 'pinia'],
+        },
+      },
+    },
+    assetsInlineLimit: 4096, // 4kb
+    cssCodeSplit: true,
+    sourcemap: false,
+  },
+  server: {
+    port: 3000,
+    open: true,
+  },
 })

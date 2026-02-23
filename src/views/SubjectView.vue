@@ -2,38 +2,31 @@
   <div class="subject-container">
     <div class="subject-header">
       <h2>{{ subjectName }}资源</h2>
-      <p>分享作业答案（加载时可能有卡顿，请耐心等待）</p>
+      <p>（加载时可能有一些卡顿，请耐心等待）</p>
     </div>
-    
+
     <div class="image-grid">
       <div v-for="(image, index) in images" :key="index" class="image-item" :style="{ animationDelay: `${index * 0.1}s` }">
         <div class="image-wrapper">
-          <img 
-            :src="image.url" 
-            :alt="`${subjectName}作业 ${index + 1}`" 
+          <!-- 直接显示图片，移除所有加载状态 -->
+          <img
+            :src="image.url"
+            :alt="`${subjectName}作业 ${index + 1}`"
             @click="openImage(image.url)"
-            loading="lazy"
-            @load="handleImageLoad(index)"
-            @error="handleImageError(index)"
+            class="image-lazy"
           />
-          <div v-if="loadingImages.includes(index)" class="image-loading">
-            <div class="loading-spinner"></div>
-          </div>
-          <div v-if="errorImages.includes(index)" class="image-error">
-            <span>图片加载失败</span>
-          </div>
         </div>
         <p>{{ image.name }}</p>
       </div>
     </div>
-    
+
     <!-- 图片放大查看 -->
     <div v-if="selectedImage" class="image-modal" @click="closeImage">
       <div class="modal-content" @click.stop>
         <div class="image-container">
           <transition name="modal-fade">
-            <img 
-              :src="selectedImage" 
+            <img
+              :src="selectedImage"
               :alt="'放大图片'"
               @touchstart="handleTouchStart"
               @touchmove="handleTouchMove"
@@ -42,6 +35,7 @@
                 transform: `scale(${scale}) rotate(${rotation}deg) translate(${translateX}px, ${translateY}px)`,
                 transition: 'transform 0.1s ease-out'
               }"
+              class="modal-image"
             />
           </transition>
         </div>
@@ -58,7 +52,7 @@
 </template>
 
 <script setup>
-import { ref, computed, defineProps, onMounted } from 'vue'
+import { ref, defineProps } from 'vue'
 
 const props = defineProps({
   subjectName: {
@@ -82,8 +76,6 @@ const translateX = ref(0)
 const translateY = ref(0)
 const lastTranslateX = ref(0)
 const lastTranslateY = ref(0)
-const loadingImages = ref([])
-const errorImages = ref([])
 
 const openImage = (url) => {
   selectedImage.value = url
@@ -93,7 +85,7 @@ const openImage = (url) => {
   translateY.value = 0
   lastTranslateX.value = 0
   lastTranslateY.value = 0
-  
+
   // 记录当前图片索引
   const index = props.images.findIndex(img => img.url === url)
   currentImageIndex.value = index
@@ -102,7 +94,7 @@ const openImage = (url) => {
 // 切换到上一张图片
 const prevImage = () => {
   if (props.images.length === 0) return
-  
+
   currentImageIndex.value = (currentImageIndex.value - 1 + props.images.length) % props.images.length
   selectedImage.value = props.images[currentImageIndex.value].url
   // 重置缩放、旋转和位置
@@ -112,7 +104,7 @@ const prevImage = () => {
 // 切换到下一张图片
 const nextImage = () => {
   if (props.images.length === 0) return
-  
+
   currentImageIndex.value = (currentImageIndex.value + 1) % props.images.length
   selectedImage.value = props.images[currentImageIndex.value].url
   // 重置缩放、旋转和位置
@@ -157,7 +149,7 @@ const handleTouchMove = (e) => {
       touch2.clientX - touch1.clientX,
       touch2.clientY - touch1.clientY
     )
-    
+
     const scaleFactor = currentDistance / lastDistance.value
     scale.value *= scaleFactor
     scale.value = Math.max(0.5, Math.min(3, scale.value))
@@ -165,7 +157,7 @@ const handleTouchMove = (e) => {
   } else if (e.touches.length === 1) {
     const currentX = e.touches[0].clientX
     const currentY = e.touches[0].clientY
-    
+
     translateX.value = lastTranslateX.value + (currentX - touchStartX.value)
     translateY.value = lastTranslateY.value + (currentY - touchStartY.value)
   }
@@ -183,22 +175,6 @@ const resetZoom = () => {
   lastTranslateX.value = 0
   lastTranslateY.value = 0
 }
-
-// 图片加载处理
-const handleImageLoad = (index) => {
-  loadingImages.value = loadingImages.value.filter(i => i !== index)
-}
-
-const handleImageError = (index) => {
-  loadingImages.value = loadingImages.value.filter(i => i !== index)
-  errorImages.value.push(index)
-}
-
-// 初始化加载状态
-onMounted(() => {
-  // 初始时标记所有图片为加载中
-  loadingImages.value = props.images.map((_, index) => index)
-})
 </script>
 
 <style scoped>
@@ -282,6 +258,58 @@ p {
   transition: transform 0.3s ease;
 }
 
+/* 图片延迟加载样式 */
+.image-lazy {
+  opacity: 1;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.image-lazy[loading="lazy"] {
+  opacity: 1;
+}
+
+.image-lazy.loaded {
+  opacity: 1;
+}
+
+/* 图片占位符 */
+.image-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 6px;
+  z-index: 0;
+}
+
+.placeholder-content {
+  width: 60px;
+  height: 60px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid rgba(102, 126, 234, 0.3);
+}
+
+.placeholder-content span {
+  font-size: 24px;
+  font-weight: bold;
+  color: #667eea;
+  text-transform: uppercase;
+}
+
+/* 模态框图片优化 */
+.modal-image {
+  transition: opacity 0.3s ease;
+}
+
 .image-item:hover .image-wrapper img {
   transform: scale(1.08);
 }
@@ -350,13 +378,13 @@ p {
     height: 120px;
     margin-bottom: 0.3rem;
   }
-  
+
   .loading-spinner {
     width: 20px;
     height: 20px;
     border-width: 2px;
   }
-  
+
   .image-error span {
     font-size: 0.7rem;
   }
@@ -562,7 +590,7 @@ p {
     right: 15px;
     left: 15px;
   }
-  
+
   .close-button,
   .reset-button,
   .rotate-button {
@@ -570,18 +598,18 @@ p {
     height: 36px;
     font-size: 18px;
   }
-  
+
   .reset-button,
   .rotate-button {
     font-size: 14px;
   }
-  
+
   .nav-button {
     padding: 0.5rem 1rem;
     font-size: 0.85rem;
     border-width: 1px;
   }
-  
+
   .prev-button::before,
   .next-button::after {
     font-size: 1rem;

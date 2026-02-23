@@ -11,7 +11,18 @@ const subjects = [
   { name: '生物', path: '/biology' }
 ]
 
+// 背景颜色选项
+const colorOptions = [
+  { name: '默认', value: 'default' },
+  { name: '黑色', value: 'black' },
+  { name: '白色', value: 'white' },
+  { name: '粉色', value: 'pink' },
+  { name: '蓝色', value: 'blue' }
+]
+
 const showBackToTop = ref(false)
+const currentColor = ref('default')
+const showColorPicker = ref(false)
 
 // 监听滚动事件
 const handleScroll = () => {
@@ -26,6 +37,18 @@ const scrollToTop = () => {
   })
 }
 
+// 获取颜色值
+const getColorValue = (color) => {
+  const colorMap = {
+    default: '#f8f9fa',
+    black: '#1a1a1a',
+    white: '#ffffff',
+    pink: '#f8d7da',
+    blue: '#d1ecf1'
+  }
+  return colorMap[color] || colorMap.default
+}
+
 // 挂载和卸载事件监听器
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
@@ -37,7 +60,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="app-container">
+  <div class="app-container" :class="`color-${currentColor}`">
     <header class="app-header">
       <h1 class="app-title">
         <span v-for="(char, index) in '资源分享平台-需要自取'" :key="index" class="title-char" :style="{ animationDelay: `${index * 0.1}s` }">
@@ -52,6 +75,24 @@ onUnmounted(() => {
       <RouterLink v-for="subject in subjects" :key="subject.path" :to="subject.path" class="nav-item">
         {{ subject.name }}
       </RouterLink>
+      <!-- 颜色选择器 -->
+      <div style="margin-left: auto;">
+        <select
+          v-model="currentColor"
+          style="
+            padding: 0.5rem;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+          "
+        >
+          <option v-for="color in colorOptions" :key="color.value" :value="color.value">
+            {{ color.name }}
+          </option>
+        </select>
+      </div>
     </nav>
     <main class="app-main">
       <!-- 添加路由过渡动画 -->
@@ -417,6 +458,162 @@ onUnmounted(() => {
     width: 40px;
     height: 40px;
     font-size: 1.2rem;
+  }
+}
+
+/* 颜色选择器样式 */
+.color-picker-wrapper {
+  position: relative;
+  margin-left: auto;
+}
+
+.color-button {
+  padding: 1rem 0.8rem;
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.color-button:hover {
+  background-color: rgba(0, 123, 255, 0.1);
+  transform: scale(1.1);
+}
+
+.color-picker-container {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  padding: 0.8rem;
+  min-width: 120px;
+  z-index: 9999;
+  animation: colorPickerFadeIn 0.3s ease-out forwards;
+  border: 1px solid #e9ecef;
+}
+
+@keyframes colorPickerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.color-option {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  margin-bottom: 0.3rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.color-option:hover {
+  transform: translateX(5px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.color-option.active {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+}
+
+.color-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333;
+}
+
+/* 不同颜色主题的样式 */
+.color-black {
+  background-color: #1a1a1a;
+  color: #f8f9fa;
+}
+
+.color-black .app-header {
+  background: #2d2d2d;
+  color: #f8f9fa;
+}
+
+.color-black .app-nav {
+  background: #333333;
+  border-bottom-color: #444444;
+}
+
+.color-black .nav-item {
+  color: #f8f9fa;
+}
+
+.color-black .nav-item:hover {
+  color: #007bff;
+  background-color: #444444;
+}
+
+.color-black .nav-item.router-link-active {
+  color: #007bff;
+  background-color: #444444;
+}
+
+.color-black .app-main {
+  background-color: #1a1a1a;
+}
+
+.color-black .app-footer {
+  background: linear-gradient(135deg, #2d2d2d, #3d3d3d);
+}
+
+.color-white .app-main {
+  background-color: #ffffff;
+}
+
+.color-pink .app-main {
+  background-color: #f8d7da;
+}
+
+.color-blue .app-main {
+  background-color: #d1ecf1;
+}
+
+/* 响应式颜色选择器 */
+@media (max-width: 768px) {
+  .color-button {
+    padding: 0.8rem 0.6rem;
+    font-size: 1rem;
+  }
+
+  .color-picker-container {
+    min-width: 100px;
+    padding: 0.6rem;
+  }
+
+  .color-option {
+    padding: 0.4rem;
+  }
+
+  .color-name {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .color-picker-wrapper {
+    margin-left: 0.5rem;
+  }
+
+  .color-button {
+    padding: 0.6rem 0.4rem;
+    font-size: 0.9rem;
   }
 }
 </style>
